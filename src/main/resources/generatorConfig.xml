@@ -31,16 +31,16 @@
             <property name="forceBigDecimals" value="false"/>
         </javaTypeResolver>
 
-        <javaModelGenerator targetPackage="${target.model.package}" targetProject="${target.project}">
+        <javaModelGenerator targetPackage="${target.model.package}" targetProject="${target.project.java}">
             <property name="enableSubPackages" value="false"/>
             <property name="trimStrings" value="true"/>
         </javaModelGenerator>
 
-        <sqlMapGenerator targetPackage="${target.mapper.xml.package}" targetProject="${target.project}">
+        <sqlMapGenerator targetPackage="${target.mapper.xml.package}" targetProject="${target.project.xml}">
             <property name="enableSubPackages" value="false"/>
         </sqlMapGenerator>
 
-        <javaClientGenerator type="XMLMAPPER" targetPackage="${target.mapper.package}" targetProject="${target.project}">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="${target.mapper.package}" targetProject="${target.project.java}">
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 

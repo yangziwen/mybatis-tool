@@ -33,6 +33,11 @@ public class GenerateCommand implements Command {
     public boolean help;
 
     @Parameter(
+            names = {"-o", "--overwrite"},
+            description = "whether to overwrite the existed files")
+    public boolean overwrite = false;
+
+    @Parameter(
             names = {"-tp", "--target-project"},
             description = "the target project absolute path",
             required = true)
@@ -55,9 +60,9 @@ public class GenerateCommand implements Command {
     public String mapperPackageSuffix = "mapper";
 
     @Parameter(
-            names = {"-xs", "--mapper-xml-package-suffix"},
-            description = "the sub-package of mapper xml")
-    public String mapperXmlPackageSuffix = "mapper";
+            names = {"-xp", "--mapper-xml-package"},
+            description = "the package of mapper xml")
+    public String xmlPackage = "mybatis/mapper";
 
     @Parameter(
             names = {"-tn", "--table-name"},
@@ -107,7 +112,7 @@ public class GenerateCommand implements Command {
 
         Configuration config = parser.parseConfiguration(this.getClass().getClassLoader().getResourceAsStream("generatorConfig.xml"));
 
-        DefaultShellCallback callback = new DefaultShellCallback(false);
+        DefaultShellCallback callback = new DefaultShellCallback(overwrite);
 
         new MyBatisGenerator(config, callback, warnings).generate(null);
 
@@ -127,13 +132,15 @@ public class GenerateCommand implements Command {
 
         properties.setProperty("database.password", GenerateConfig.database.password);
 
-        properties.setProperty("target.project", targetProject + "/src/main/java");
+        properties.setProperty("target.project.java", targetProject + "/src/main/java");
+
+        properties.setProperty("target.project.xml", targetProject + "/src/main/resources");
 
         properties.setProperty("target.model.package", basePackage + "." + modelPackageSuffix);
 
         properties.setProperty("target.mapper.package", basePackage + "." + mapperPackageSuffix);
 
-        properties.setProperty("target.mapper.xml.package", basePackage + "." + mapperXmlPackageSuffix);
+        properties.setProperty("target.mapper.xml.package", xmlPackage);
 
         properties.setProperty("table.name", tableName);
 
