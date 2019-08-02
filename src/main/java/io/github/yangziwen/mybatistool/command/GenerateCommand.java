@@ -4,6 +4,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 import static org.fusesource.jansi.Ansi.Color.GREEN;
 import static org.fusesource.jansi.Ansi.Color.YELLOW;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,28 @@ import io.github.yangziwen.mybatistool.GenerateConfig;
         commandDescription = "generate codes for mybatis")
 public class GenerateCommand implements Command {
 
+    private static final String DATABASE_DRIVER_CLASS_NAME = "database.driverClassName";
+
+    private static final String DATABASE_URL = "database.url";
+
+    private static final String DATABASE_USERNAME = "database.username";
+
+    private static final String DATABASE_PASSWORD = "database.password";
+
+    private static final String TARGET_PROJECT_JAVA = "target.project.java";
+
+    private static final String TARGET_PROJECT_XML = "target.project.xml";
+
+    private static final String TARGET_MODEL_PACKAGE = "target.model.package";
+
+    private static final String TARGET_MAPPER_PACKAGE = "target.mapper.package";
+
+    private static final String TARGET_MAPPER_XML_PACKAGE = "target.mapper.xml.package";
+
+    private static final String TABLE_NAME = "table.name";
+
+    private static final String MODEL_NAME = "model.name";
+
     @Parameter(
             names = {"-h", "--help"},
             description = "print this message",
@@ -36,6 +59,11 @@ public class GenerateCommand implements Command {
             names = {"-o", "--overwrite"},
             description = "whether to overwrite the existed files")
     public boolean overwrite = false;
+
+    @Parameter(
+            names = {"-m", "--mergeable"},
+            description = "merge the new mapper.xml with the old one if true, otherwise will backup the old mapper.xml")
+    public boolean mergeable = false;
 
     @Parameter(
             names = {"-tp", "--target-project"},
@@ -86,7 +114,11 @@ public class GenerateCommand implements Command {
 
         try {
 
-            List<String> warnings = generate(collectProperties());
+            Properties properties = collectProperties();
+
+            backupExistingMapperXmlIfNecessary(properties);
+
+            List<String> warnings = generate(properties);
 
             if (warnings.size() > 0) {
                 for (String warning : warnings) {
@@ -104,7 +136,7 @@ public class GenerateCommand implements Command {
 
     }
 
-    public List<String> generate(Properties properties) throws Exception {
+    private List<String> generate(Properties properties) throws Exception {
 
         List<String> warnings = new ArrayList<>();
 
@@ -124,25 +156,25 @@ public class GenerateCommand implements Command {
 
         Properties properties = new Properties();
 
-        properties.setProperty("database.driverClassName", GenerateConfig.database.driver_class_name);
+        properties.setProperty(DATABASE_DRIVER_CLASS_NAME, GenerateConfig.database.driver_class_name);
 
-        properties.setProperty("database.url", GenerateConfig.database.url);
+        properties.setProperty(DATABASE_URL, GenerateConfig.database.url);
 
-        properties.setProperty("database.username", GenerateConfig.database.username);
+        properties.setProperty(DATABASE_USERNAME, GenerateConfig.database.username);
 
-        properties.setProperty("database.password", GenerateConfig.database.password);
+        properties.setProperty(DATABASE_PASSWORD, GenerateConfig.database.password);
 
-        properties.setProperty("target.project.java", targetProject + "/src/main/java");
+        properties.setProperty(TARGET_PROJECT_JAVA, targetProject + "/src/main/java");
 
-        properties.setProperty("target.project.xml", targetProject + "/src/main/resources");
+        properties.setProperty(TARGET_PROJECT_XML, targetProject + "/src/main/resources");
 
-        properties.setProperty("target.model.package", basePackage + "." + modelPackageSuffix);
+        properties.setProperty(TARGET_MODEL_PACKAGE, basePackage + "." + modelPackageSuffix);
 
-        properties.setProperty("target.mapper.package", basePackage + "." + mapperPackageSuffix);
+        properties.setProperty(TARGET_MAPPER_PACKAGE, basePackage + "." + mapperPackageSuffix);
 
-        properties.setProperty("target.mapper.xml.package", xmlPackage);
+        properties.setProperty(TARGET_MAPPER_XML_PACKAGE, xmlPackage);
 
-        properties.setProperty("table.name", tableName);
+        properties.setProperty(TABLE_NAME, tableName);
 
         if (modelName == null || modelName.trim().length() == 0) {
             modelName = Arrays.stream(tableName.split("_"))
@@ -150,9 +182,38 @@ public class GenerateCommand implements Command {
                     .collect(Collectors.joining(""));
         }
 
-        properties.setProperty("model.name", modelName);
+        properties.setProperty(MODEL_NAME, modelName);
 
         return properties;
+    }
+
+    private void backupExistingMapperXmlIfNecessary(Properties properties) {
+
+        if (mergeable) {
+            return;
+        }
+
+        if (!overwrite) {
+            return;
+        }
+
+        String mapperXmlPackage = properties.getProperty(TARGET_PROJECT_XML) + "/" + properties.getProperty(TARGET_MAPPER_XML_PACKAGE);
+
+        String mapperXmlFilename = modelName + "Mapper.xml";
+
+        String mapperXmlPath = mapperXmlPackage + "/" + mapperXmlFilename;
+
+        File mapperXmlFile = new File(mapperXmlPath);
+
+        if (mapperXmlFile.exists()) {
+            int i = 1;
+            File backupFile = new File(mapperXmlPath + ".backup" + i++);
+            while (backupFile.exists()) {
+                backupFile = new File(mapperXmlPath + ".backup" + i++);
+            }
+            mapperXmlFile.renameTo(backupFile);
+        }
+
     }
 
 }
