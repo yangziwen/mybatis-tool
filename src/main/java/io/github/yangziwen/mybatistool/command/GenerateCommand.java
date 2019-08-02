@@ -1,5 +1,9 @@
 package io.github.yangziwen.mybatistool.command;
 
+import static org.fusesource.jansi.Ansi.ansi;
+import static org.fusesource.jansi.Ansi.Color.GREEN;
+import static org.fusesource.jansi.Ansi.Color.YELLOW;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,17 +45,17 @@ public class GenerateCommand implements Command {
     public String basePackage;
 
     @Parameter(
-            names = {"--model-package-suffix"},
+            names = {"-os", "--model-package-suffix"},
             description = "the sub-package of model")
     public String modelPackageSuffix = "po";
 
     @Parameter(
-            names = {"--mapper-package-suffix"},
+            names = {"-ps", "--mapper-package-suffix"},
             description = "the sub-package of mapper")
     public String mapperPackageSuffix = "mapper";
 
     @Parameter(
-            names = {"--mapper-xml-package-suffix"},
+            names = {"-xs", "--mapper-xml-package-suffix"},
             description = "the sub-package of mapper xml")
     public String mapperXmlPackageSuffix = "mapper";
 
@@ -70,8 +74,25 @@ public class GenerateCommand implements Command {
     @Override
     public void invoke(JCommander commander) {
 
+        if (help) {
+            commander.usage(name());
+            return;
+        }
+
         try {
-            generate(collectProperties());
+
+            List<String> warnings = generate(collectProperties());
+
+            if (warnings.size() > 0) {
+                for (String warning : warnings) {
+                    System.out.println(ansi().fg(YELLOW).a(warning).reset());
+                }
+            }
+
+            System.out.println(ansi()
+                    .a("codes of table[").fg(GREEN).a(tableName).reset().a("] ")
+                    .a("are generated ").fg(GREEN).a("successfully").reset());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,7 +105,7 @@ public class GenerateCommand implements Command {
 
         ConfigurationParser parser = new ConfigurationParser(properties, warnings);
 
-        Configuration config = parser.parseConfiguration(this.getClass().getResourceAsStream("generatorConfig.xml"));
+        Configuration config = parser.parseConfiguration(this.getClass().getClassLoader().getResourceAsStream("generatorConfig.xml"));
 
         DefaultShellCallback callback = new DefaultShellCallback(false);
 
@@ -105,6 +126,8 @@ public class GenerateCommand implements Command {
         properties.setProperty("database.username", GenerateConfig.database.username);
 
         properties.setProperty("database.password", GenerateConfig.database.password);
+
+        properties.setProperty("target.project", targetProject + "/src/main/java");
 
         properties.setProperty("target.model.package", basePackage + "." + modelPackageSuffix);
 
