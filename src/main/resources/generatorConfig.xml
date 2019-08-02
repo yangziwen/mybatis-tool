@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+    <context id="dev" targetRuntime="MyBatis3">
+
+        <plugin type="org.mybatis.generator.plugins.PaginationPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.CustomOrCriteriaPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin">
+            <property name="searchString" value="Example$" />
+            <property name="replaceString" value="Criteria" />
+        </plugin>
+
+        <commentGenerator>
+            <property name="javaFileEncoding" value="UTF-8" />
+            <property name="suppressAllComments" value="true" />
+            <property name="suppressDate" value="false" />
+        </commentGenerator>
+
+        <jdbcConnection
+                driverClass="${database.driverClassName}"
+                connectionURL="${database.url}"
+                userId="${database.username}"
+                password="${database.password}"
+        />
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="${target.model.package}" targetProject="${target.project}">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="${target.mapper.xml.package}" targetProject="${target.project}">
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="${target.mapper.package}" targetProject="${target.project}">
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <table schema="" tableName="${table.name}" domainObjectName="${model.name}">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true" />
+        </table>
+
+    </context>
+
+</generatorConfiguration>
