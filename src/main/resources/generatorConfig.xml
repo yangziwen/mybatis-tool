@@ -57,8 +57,9 @@
                 driverClass="${database.driverClassName}"
                 connectionURL="${database.url}"
                 userId="${database.username}"
-                password="${database.password}"
-        />
+                password="${database.password}">
+            <property name="useInformationSchema" value="true"/>
+        </jdbcConnection>
 
         <javaTypeResolver>
             <property name="forceBigDecimals" value="false"/>

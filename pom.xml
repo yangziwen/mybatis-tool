@@ -55,7 +55,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>mybatis-tool</finalName>
+		<finalName>mybatis-tool-v2</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
