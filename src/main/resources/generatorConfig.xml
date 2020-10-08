@@ -7,12 +7,45 @@
 
     <context id="dev" targetRuntime="MyBatis3">
 
-        <plugin type="org.mybatis.generator.plugins.PaginationPlugin"/>
-        <plugin type="org.mybatis.generator.plugins.CustomOrCriteriaPlugin"/>
+        <property name="mybatisVersion" value="3.4.0"/>
+
+        <!-- Mapper注解插件 -->
+        <plugin type="com.itfsw.mybatis.generator.plugins.MapperAnnotationPlugin">
+            <!-- @Mapper 默认开启 -->
+            <property name="@Mapper" value="false"/>
+            <!-- @Repository 默认关闭，开启后解决IDEA工具@Autowired报错 -->
+            <property name="@Repository" value="true"/>
+        </plugin>
+
+        <plugin type="com.itfsw.mybatis.generator.plugins.LombokPlugin">
+            <!-- @Data 默认开启,同时插件会对子类自动附加@EqualsAndHashCode(callSuper = true)，@ToString(callSuper = true) -->
+            <property name="@Data" value="true"/>
+        </plugin>
+
+        <!-- MySQL分页插件 -->
+        <plugin type="com.itfsw.mybatis.generator.plugins.LimitPlugin">
+            <!-- 通过配置startPage影响Example中的page方法开始分页的页码，默认分页从0开始 -->
+            <property name="startPage" value="0"/>
+        </plugin>
+
+        <!-- <plugin type="org.mybatis.generator.plugins.PaginationPlugin"/> -->
+
+        <!-- <plugin type="org.mybatis.generator.plugins.CustomOrCriteriaPlugin"/> -->
+
         <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin">
             <property name="searchString" value="Example$" />
             <property name="replaceString" value="Criteria" />
         </plugin>
+
+        <plugin type="com.itfsw.mybatis.generator.plugins.BatchInsertPlugin">
+            <!--
+            开启后可以实现官方插件根据属性是否为空决定是否插入该字段功能
+            ！需开启allowMultiQueries=true多条sql提交操作，所以不建议使用！插件默认不开启
+            -->
+            <property name="allowMultiQueries" value="false"/>
+        </plugin>
+
+        <plugin type="com.itfsw.mybatis.generator.plugins.ModelColumnPlugin"/>
 
         <commentGenerator>
             <property name="javaFileEncoding" value="UTF-8" />
