@@ -59,6 +59,7 @@
                 userId="${database.username}"
                 password="${database.password}">
             <property name="useInformationSchema" value="true"/>
+            <property name="nullCatalogMeansCurrent" value="true"/>
         </jdbcConnection>
 
         <javaTypeResolver>
