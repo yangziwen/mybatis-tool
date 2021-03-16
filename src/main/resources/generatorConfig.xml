@@ -47,7 +47,7 @@
 
         <plugin type="com.itfsw.mybatis.generator.plugins.ModelColumnPlugin"/>
 
-        <commentGenerator>
+        <commentGenerator type="io.github.yangziwen.mybatistool.generator.SimpleCommentGenerator">
             <property name="javaFileEncoding" value="UTF-8" />
             <property name="suppressAllComments" value="true" />
             <property name="suppressDate" value="false" />
