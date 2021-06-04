@@ -7,12 +7,14 @@ import static org.fusesource.jansi.Ansi.Color.YELLOW;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
+import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.xml.ConfigurationParser;
 import org.mybatis.generator.internal.DefaultShellCallback;
 
@@ -64,6 +66,12 @@ public class GenerateCommand implements Command {
             names = {"-m", "--mergeable"},
             description = "merge the new mapper.xml with the old one if true, otherwise will backup the old mapper.xml")
     public boolean mergeable = false;
+
+    @Parameter(
+            names = {"-gk", "--generated-key"},
+            description = "whether to generate id automatically when insert data and fill back id values to objects",
+            arity = 1)
+    public boolean generatedKey = true;
 
     @Parameter(
             names = {"-tp", "--target-project"},
@@ -143,6 +151,13 @@ public class GenerateCommand implements Command {
         ConfigurationParser parser = new ConfigurationParser(properties, warnings);
 
         Configuration config = parser.parseConfiguration(this.getClass().getClassLoader().getResourceAsStream("generatorConfig.xml"));
+
+        if (!generatedKey) {
+            config.getContexts().stream()
+                .map(Context::getTableConfigurations)
+                .flatMap(Collection::stream)
+                .forEach(tableConfig -> tableConfig.setGeneratedKey(null));
+        }
 
         DefaultShellCallback callback = new DefaultShellCallback(overwrite);
 
